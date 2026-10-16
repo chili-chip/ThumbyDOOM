@@ -18,6 +18,7 @@
 #include "m_random.h"
 #include "doom_overlay_menu.h"
 #include "doom_font.h"
+#include "thumby_rgb565.h"
 #include "doom/doomdef.h"
 #include "doom/d_player.h"
 #include "doom/doomstat.h"
@@ -142,7 +143,7 @@ static void rebuild_palette(int palnum)
             g = gtable[g];
             b = gtable[b];
         }
-        palette_rgb565[i] = (uint16_t)(((r & 0xf8) << 8) | ((g & 0xfc) << 3) | (b >> 3));
+        palette_rgb565[i] = THUMBY_RGB565(r, g, b);
     }
     palette_dirty = 0;
 }

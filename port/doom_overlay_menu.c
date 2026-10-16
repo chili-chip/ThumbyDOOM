@@ -90,7 +90,8 @@ static char batt_text[16];  /* "95% 3.85V" or "CHRG 4.15V" */
 static int  batt_cached_pct;  /* captured at menu-open, reused per-frame */
 
 /* --- Colours (RGB565) --- */
-#define COL_ORANGE  0xFD20
+#include "thumby_rgb565.h"
+#define COL_ORANGE  THUMBY_RGB565(255, 164, 0)
 #define COL_GREEN   0x07E0
 #define COL_WHITE   0xFFFF
 #define COL_GREY    0x8410

@@ -9,6 +9,7 @@
 #include "config.h"
 #include <stdarg.h>
 #include <stdio.h>
+#include "thumby_rgb565.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -110,7 +111,7 @@ void __wrap_panic(const char *fmt, ...)
 __attribute__((noreturn))
 void __wrap_panic_unsupported(void)
 {
-    thumby_error_flash(0xFD20); /* orange — distinct from panic */
+    thumby_error_flash(THUMBY_RGB565(255, 164, 0)); /* orange — distinct from panic */
     for (;;) tight_loop_contents();
 }
 
