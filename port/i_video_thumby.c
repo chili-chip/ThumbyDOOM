@@ -160,7 +160,13 @@ void thumby_tag_ext(int x, int y, uint16_t color) { (void)x; (void)y; (void)colo
 
 /* --- Classic Doom screen melt (RGB565, 128x128) -------------------- */
 
+#if CHILI_BLIT
+/* chili-doom: the overlay menu borrows this buffer for its backdrop (see
+ * doom_overlay_menu.c), which saves 32 KB on the 448 KB console. */
+uint16_t wipe_snap[128 * 128];          /* 32 KB old-screen snapshot */
+#else
 static uint16_t wipe_snap[128 * 128];   /* 32 KB old-screen snapshot */
+#endif
 static int16_t  melt_y[128];            /* per-column drop position   */
 static int      melt_active;
 
@@ -182,6 +188,9 @@ void thumby_melt_start(void)
 }
 
 int thumby_melt_is_active(void) { return melt_active; }
+
+/* Drop a melt in progress, showing the new screen at once. */
+void thumby_melt_cancel(void) { melt_active = 0; }
 
 /* Advance column offsets by one tick and composite the old screen
  * (sliding down) on top of g_fb which already holds the new frame.

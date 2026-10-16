@@ -138,7 +138,14 @@ enum {
 static int  menu_open;
 static int  cursor;
 static int  scroll_top;
+#if CHILI_BLIT
+/* chili-doom: share the screen-melt snapshot buffer (i_video_thumby.c);
+ * opening the menu cancels any melt in progress. */
+extern uint16_t wipe_snap[FB_W * FB_H];
+#define backdrop wipe_snap
+#else
 static uint16_t backdrop[FB_W * FB_H];
+#endif
 
 /* Settings values (declared early for persistence functions) */
 static int val_show_fps;
@@ -434,6 +441,12 @@ void overlay_menu_open_now(void)
     val_noclip  = (p->cheats & CF_NOCLIP) ? 1 : 0;
     val_gamma   = usegamma;
 
+#if CHILI_BLIT
+    {
+        extern void thumby_melt_cancel(void);
+        thumby_melt_cancel();
+    }
+#endif
     dim_backdrop();
 }
 
