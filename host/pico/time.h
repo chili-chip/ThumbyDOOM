@@ -8,6 +8,11 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#if CHILI_BLIT
+/* chili-doom: the clock comes from the 32blit glue (no gettimeofday on
+ * every 32blit target). */
+uint64_t time_us_64(void);
+#else
 #include <sys/time.h>
 
 static inline uint64_t time_us_64(void) {
@@ -15,6 +20,7 @@ static inline uint64_t time_us_64(void) {
     gettimeofday(&tv, 0);
     return (uint64_t)tv.tv_sec * 1000000ull + tv.tv_usec;
 }
+#endif
 typedef uint64_t absolute_time_t;
 static inline absolute_time_t make_timeout_time_ms(uint32_t ms) { return time_us_64() + ms * 1000ull; }
 static inline bool time_reached(absolute_time_t t) { return time_us_64() >= t; }
