@@ -90,7 +90,8 @@ static char batt_text[16];  /* "95% 3.85V" or "CHRG 4.15V" */
 static int  batt_cached_pct;  /* captured at menu-open, reused per-frame */
 
 /* --- Colours (RGB565) --- */
-#define COL_ORANGE  0xFD20
+#include "thumby_rgb565.h"
+#define COL_ORANGE  THUMBY_RGB565(255, 164, 0)
 #define COL_GREEN   0x07E0
 #define COL_WHITE   0xFFFF
 #define COL_GREY    0x8410
@@ -138,7 +139,14 @@ enum {
 static int  menu_open;
 static int  cursor;
 static int  scroll_top;
+#if CHILI_BLIT
+/* chili-doom: share the screen-melt snapshot buffer (i_video_thumby.c);
+ * opening the menu cancels any melt in progress. */
+extern uint16_t wipe_snap[FB_W * FB_H];
+#define backdrop wipe_snap
+#else
 static uint16_t backdrop[FB_W * FB_H];
+#endif
 
 /* Settings values (declared early for persistence functions) */
 static int val_show_fps;
@@ -434,6 +442,12 @@ void overlay_menu_open_now(void)
     val_noclip  = (p->cheats & CF_NOCLIP) ? 1 : 0;
     val_gamma   = usegamma;
 
+#if CHILI_BLIT
+    {
+        extern void thumby_melt_cancel(void);
+        thumby_melt_cancel();
+    }
+#endif
     dim_backdrop();
 }
 

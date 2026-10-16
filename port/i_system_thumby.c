@@ -9,6 +9,7 @@
 #include "config.h"
 #include <stdarg.h>
 #include <stdio.h>
+#include "thumby_rgb565.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -90,7 +91,7 @@ void I_Error(const char *error, ...)
 /* Host: pico SDK's pico_platform_panic provides this on device.
  * Vendor code occasionally calls panic_unsupported() — keep host
  * builds linkable. */
-void panic_unsupported(void)
+__attribute__((weak)) void panic_unsupported(void)
 {
     thumby_error_flash(0xF81F);
     for (;;) tight_loop_contents();
@@ -110,13 +111,17 @@ void __wrap_panic(const char *fmt, ...)
 __attribute__((noreturn))
 void __wrap_panic_unsupported(void)
 {
-    thumby_error_flash(0xFD20); /* orange — distinct from panic */
+    thumby_error_flash(THUMBY_RGB565(255, 164, 0)); /* orange — distinct from panic */
     for (;;) tight_loop_contents();
 }
 
 /* Zone heap. 160 KB — RENDER_COL_MAX back to 7200 to rule out
- * column overflow as crash cause. */
-static byte zone[160 * 1024] __attribute__((aligned(4)));
+ * column overflow as crash cause. Builds short of RAM can pass a
+ * smaller THUMBY_ZONE_KB (chili-doom uses 144). */
+#ifndef THUMBY_ZONE_KB
+#define THUMBY_ZONE_KB 160
+#endif
+static byte zone[THUMBY_ZONE_KB * 1024] __attribute__((aligned(4)));
 
 byte *I_ZoneBase(int *size)
 {

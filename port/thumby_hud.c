@@ -29,7 +29,8 @@
 extern uint16_t g_fb[128 * 128];
 
 /* RGB565 color helpers */
-#define RGB565(r, g, b) (uint16_t)(((r >> 3) << 11) | ((g >> 2) << 5) | (b >> 3))
+#include "thumby_rgb565.h"
+#define RGB565(r, g, b) THUMBY_RGB565(r, g, b)
 #define COL_BG          RGB565(  8,  8,  8)
 #define COL_SEP         RGB565( 80, 80, 80)
 #define COL_LABEL       RGB565(180,180,180)
