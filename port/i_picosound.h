@@ -24,4 +24,9 @@ boolean I_PicoSoundIsInitialized(void);
 void I_PicoSoundFade(boolean in);
 boolean I_PicoSoundFading(void);
 
+#if CHILI_BLIT
+/* Mix n <= 128 mono samples at 49716 Hz (see i_picosound_thumby.c). */
+void I_PicoSoundMix(int16_t *out, int n);
+#endif
+
 #endif

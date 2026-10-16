@@ -199,7 +199,10 @@ static void mix_audio(int16_t *out, int n_samples)
     int32_t mix[MIX_BUFFER_SAMPLES];
 
     /* --- Music (OPL2) at 49716 Hz → downsample to 22050 Hz --- */
-    if (music_generator) {
+    /* Music volume 0 in the overlay menu skips the OPL emulator entirely,
+     * which frees the audio core's time on slower hosts. */
+    extern int overlay_menu_get_music(void);
+    if (music_generator && overlay_menu_get_music() > 0) {
         /* Generate OPL at its native rate into a temp stereo buffer. */
         int opl_n = (n_samples * PICO_SOUND_SAMPLE_FREQ + PWM_SAMPLE_RATE - 1) / PWM_SAMPLE_RATE;
         if (opl_n > (int)OPL_SAMPLES_PER_MIX) opl_n = OPL_SAMPLES_PER_MIX;
@@ -220,7 +223,6 @@ static void mix_audio(int16_t *out, int n_samples)
         }
         for (int i = count; i < n_samples; i++) mix[i] = 0;
         /* Apply music volume from overlay menu (0-10). */
-        extern int overlay_menu_get_music(void);
         int mvol = overlay_menu_get_music();
         if (mvol < 10) {
             for (int i = 0; i < n_samples; i++)
@@ -358,8 +360,23 @@ static boolean I_Pico_SoundIsPlaying(int channel) {
     return is_channel_playing(channel);
 }
 
+#if CHILI_BLIT
+/* chili-doom: the 32blit audio mixer pulls samples through this, from its
+ * own thread (SDL) or core (console), the way core1_sound_loop does on the
+ * Thumby. Produces n <= MIX_BUFFER_SAMPLES mono samples at PWM_SAMPLE_RATE. */
+void I_PicoSoundMix(int16_t *out, int n)
+{
+    if (n > MIX_BUFFER_SAMPLES) n = MIX_BUFFER_SAMPLES;
+    if (!sound_initialized) {
+        memset(out, 0, n * sizeof(int16_t));
+        return;
+    }
+    mix_audio(out, n);
+}
+#endif
+
 static void I_Pico_UpdateSound(void) {
-#if !PICO_ON_DEVICE
+#if !PICO_ON_DEVICE && !CHILI_BLIT
     /* On host: mix inline since there's no core1. */
     if (!sound_initialized) return;
     int16_t buf[MIX_BUFFER_SAMPLES];
