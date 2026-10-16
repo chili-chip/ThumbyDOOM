@@ -25,12 +25,7 @@
 #include "opl_queue.h"
 #include "i_picosound.h"
 
-#if PICO_ON_DEVICE
 #include "pico/stdlib.h"
-#else
-#include <unistd.h>
-static inline void sleep_us(uint64_t us) { usleep(us); }
-#endif
 
 /* emu8950 */
 #include "emu8950.h"

@@ -133,3 +133,11 @@ void I_PrintDivider(void)            { }
 void I_PrintStartupBanner(const char *gamedescription) { }
 
 const char *I_GetExeDir(void) { return ""; }
+
+/* chili-doom: nothing to clean up on exit. Optimised builds drop the
+ * only caller (behind -statdump), debug builds still need the symbol. */
+void I_AtExit(atexit_func_t func, boolean run_if_error)
+{
+    (void)func;
+    (void)run_if_error;
+}
